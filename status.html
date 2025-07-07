@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Cotizaciones - Panel de Control</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1e293b;
+            --secondary-color: #3b82f6;
+            --accent-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        /* Layout Principal */
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header/Navbar */
+        .top-navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #334155 100%);
+            color: white;
+            padding: 0;
+            box-shadow: var(--shadow-lg);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--secondary-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .brand-subtitle {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            margin: 0;
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .dashboard-titles {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .dashboard-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .dashboard-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .stat-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .stat-icon.primary { background: rgba(59, 130, 246, 0.1); color: var(--secondary-color); }
+        .stat-icon.success { background: rgba(16, 185, 129, 0.1); color: var(--accent-color); }
+        .stat-icon.warning { background: rgba(245, 158, 11, 0.1); color: var(--warning-color); }
+        .stat-icon.danger { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-change {
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .stat-change.positive { color: var(--accent-color); }
+        .stat-change.negative { color: var(--danger-color); }
+
+        /* Data Table */
+        .data-table-container {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .table-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--light-bg);
+            color: var(--text-primary);
+        }
+
+        .btn-bi {
+            background: #f2c811;
+            color: #000;
+        }
+
+        .btn-bi:hover {
+            background: #e0b908;
+            transform: translateY(-1px);
+        }
+
+        .btn-ai {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-ai:hover {
+            background: #0d9e6e;
+            transform: translateY(-1px);
+        }
+
+        .search-box {
+            position: relative;
+            min-width: 250px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Professional Table */
+        .professional-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            table-layout: fixed; /* Keep fixed layout for consistent column widths */
+        }
+
+        .professional-table thead {
+            background: var(--light-bg);
+        }
+
+        .professional-table th {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        .professional-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+            word-wrap: break-word; /* Allow words to break to fit */
+            overflow-wrap: break-word; /* Ensure long words wrap */
+        }
+
+        /* Column widths for better layout */
+        /* Removed width for ID column */
+        .professional-table th:nth-child(1) { width: 10%; } /* Fecha */
+        .professional-table th:nth-child(2) { width: 15%; } /* Cliente */
+        .professional-table th:nth-child(3) { width: 20%; } /* Contacto - Increased width */
+        .professional-table th:nth-child(4) { width: 10%; } /* Ubicaciones */
+        .professional-table th:nth-child(5) { width: 12%; } /* Categoría */
+        .professional-table th:nth-child(6) { width: 10%; } /* Recursos */
+        .professional-table th:nth-child(7) { width: 8%; }  /* Horas */
+        .professional-table th:nth-child(8) { width: 15%; } /* Valor */
+        .professional-table th:nth-child(9) { width: 10%; } /* Estado */
+
+        .client-name {
+            font-weight: 600;
+            line-height: 1.2;
+            /* max-width: 150px; removed max-width */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+            position: relative;
+        }
+
+        .client-name:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 0;
+            top: 100%;
+            background: var(--primary-color);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: normal;
+            width: 200px;
+            z-index: 100;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .contact-info {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.3;
+        }
+
+        .contact-info div {
+            margin-bottom: 2px;
+            /* Removed overflow, text-overflow, white-space to allow full visibility */
+            position: relative;
+        }
+
+        .contact-info div.copyable {
+            cursor: pointer;
+            text-decoration: underline;
+            color: var(--secondary-color); /* Make it look clickable */
+        }
+
+        .contact-info div.copyable:hover {
+            color: #2563eb;
+        }
+
+        /* Removed tooltip for contact info div as we want full visibility and clickability */
+        /*
+        .contact-info div:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 0;
+            top: 100%;
+            background: var(--primary-color);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: normal;
+            width: 200px;
+            z-index: 100;
+            box-shadow: var(--shadow-lg);
+        }
+        */
+
+        .professional-table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        .professional-table tbody tr:hover {
+            background: rgba(59, 130, 246, 0.02);
+        }
+
+        .professional-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-badge.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-color);
+        }
+
+        .status-badge.pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+        }
+
+        .status-badge.completed {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--secondary-color);
+        }
+
+        /* Currency Format */
+        .currency {
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        /* Loading State */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: var(--accent-color);
+        }
+
+        .toast.error {
+            background: var(--danger-color);
+        }
+
+        /* AI Analysis Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-container {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .modal-content {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        .ai-response {
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .ai-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            gap: 1rem;
+        }
+
+        .ai-loading-text {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ai-prompt-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .ai-prompt-textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            min-height: 120px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .ai-prompt-textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .navbar-content {
+                padding: 1rem;
+            }
+
+            .brand-text {
+                display: none;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .table-actions {
+                justify-content: stretch;
+                flex-wrap: wrap;
+            }
+
+            .search-box {
+                min-width: auto;
+            }
+
+            .professional-table {
+                font-size: 0.75rem;
+            }
+
+            .professional-table th,
+            .professional-table td {
+                padding: 0.5rem;
+            }
+
+            .client-name:hover::after,
+            .contact-info div:hover::after {
+                width: 150px;
+                font-size: 0.65rem;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .dashboard-actions {
+                width: 100%;
+            }
+        }
+
+        /* Scrollbar personalizado */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--light-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <nav class="top-navbar">
+            <div class="navbar-content">
+                <div class="brand">
+                    <div class="brand-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="brand-text">
+                        <h1 class="brand-title">CRM Cotizaciones</h1>
+                        <p class="brand-subtitle">Sistema de Gestión Empresarial</p>
+                    </div>
+                </div>
+                <div class="navbar-actions">
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>Conectado</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="dashboard-header">
+                <div class="dashboard-titles">
+                    <h2 class="dashboard-title">Panel de Control</h2>
+                    <p class="dashboard-subtitle">Monitoreo en tiempo real de cotizaciones y actividad del sistema</p>
+                     <p class="dashboard-subtitle">Desarrollado por: Alex Rendon - Merchandising Express</p>
+                </div>
+                <div class="dashboard-actions">
+                    <button class="btn btn-bi" id="openBiBtn">
+                        <i class="fas fa-chart-pie"></i>
+                        Ver BI
+                    </button>
+                    <button class="btn btn-ai" id="openAiBtn">
+                        <i class="fas fa-robot"></i>
+                        Análisis IA
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Total Cotizaciones</span>
+                        <div class="stat-icon primary">
+                            <i class="fas fa-file-invoice"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="totalCotizaciones">0</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>Este mes</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Valor Total</span>
+                        <div class="stat-icon success">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="valorTotal">$0</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+12% vs anterior</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Promedio por Cliente</span>
+                        <div class="stat-icon warning">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="promedioCliente">$0</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>Última semana</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-title">Horas Totales</span>
+                        <div class="stat-icon danger">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="horasTotales">0</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>Capacidad utilizada</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-table-container">
+                <div class="table-header">
+                    <h3 class="table-title">
+                        <i class="fas fa-table"></i>
+                        Historial de Cotizaciones
+                    </h3>
+                    <div class="table-actions">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="search-input" placeholder="Buscar cotizaciones..." id="searchInput">
+                        </div>
+                        <button class="btn btn-outline" id="exportBtn">
+                            <i class="fas fa-download"></i>
+                            Exportar
+                        </button>
+                        <button class="btn btn-primary" id="refreshBtn">
+                            <i class="fas fa-sync-alt"></i>
+                            Actualizar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-content">
+                    <div class="loading-container" id="loadingContainer">
+                        <div class="spinner"></div>
+                        <p>Cargando datos...</p>
+                    </div>
+
+                    <table class="professional-table" id="cotizacionesTable" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Cliente</th>
+                                <th>Contacto</th>
+                                <th>Ubicaciones</th>
+                                <th>Categoría</th>
+                                <th>Recursos</th>
+                                <th>Horas</th>
+                                <th>Valor Total</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+
+                    <div class="empty-state" id="emptyState" style="display: none;">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-inbox"></i>
+                        </div>
+                        <h3>No hay cotizaciones disponibles</h3>
+                        <p>Los datos aparecerán aquí cuando se generen nuevas cotizaciones</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toastNotification"></div>
+
+    <div class="modal-overlay" id="aiModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-robot"></i>
+                    Asistente de Análisis Inteligente
+                </h3>
+                <button class="modal-close" id="closeAiModal">&times;</button>
+            </div>
+            <div class="modal-content" id="aiModalContent">
+                <div class="ai-prompt-form" id="aiPromptForm">
+                    <h4>Describe lo que necesitas analizar:</h4>
+                    <textarea class="ai-prompt-textarea" id="aiPromptTextarea" placeholder="Ej: Analiza las tendencias de ventas por categoría en los últimos 3 meses..."></textarea>
+                    <button class="btn btn-primary" id="submitAiPrompt">
+                        <i class="fas fa-paper-plane"></i>
+                        Enviar consulta
+                    </button>
+                </div>
+                <div class="ai-loading" id="aiLoading" style="display: none;">
+                    <div class="spinner"></div>
+                    <div class="ai-loading-text">
+                        <i class="fas fa-brain"></i>
+                        <span>Procesando tu solicitud...</span>
+                    </div>
+                </div>
+                <div class="ai-response" id="aiResponse" style="display: none;"></div>
+            </div>
+            <div class="modal-footer" id="aiModalFooter" style="display: none;">
+                <button class="btn btn-outline" id="newAiAnalysis">
+                    <i class="fas fa-plus"></i>
+                    Nueva consulta
+                </button>
+                <button class="btn btn-primary" id="copyAiResponse">
+                    <i class="fas fa-copy"></i>
+                    Copiar análisis
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.22.0/firebase-database-compat.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDOnje2jk40MB40Uq7EmG3SY-iUKptm24E",
+            authDomain: "cotizador-me.firebaseapp.com",
+            databaseURL: "https://cotizador-me-default-rtdb.firebaseio.com",
+            projectId: "cotizador-me",
+            storageBucket: "cotizador-me.appspot.com",
+            messagingSenderId: "349543945550",
+            appId: "1:349543945550:web:8a75794503d8de43453a1f",
+            measurementId: "G-B1CY51NCC3"
+        };
+
+        // Global variables
+        let db;
+        let allCotizaciones = [];
+        let filteredCotizaciones = [];
+        let dataListener = null;
+
+        // Initialize Firebase
+        function initializeFirebase() {
+            try {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                db = firebase.database();
+                console.log('Firebase initialized successfully');
+                showToast('Conectado a la base de datos', 'success');
+                return true;
+            } catch (error) {
+                console.error('Error initializing Firebase:', error);
+                showToast('Error de conexión con la base de datos', 'error');
+                return false;
+            }
+        }
+
+        // Show toast notification
+        function showToast(message, type = '') {
+            const toast = document.getElementById('toastNotification');
+            toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+            toast.className = `toast ${type}`;
+            
+            // Show toast
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000);
+        }
+
+        // Format currency
+        function formatCurrency(value) {
+            if (!value || isNaN(value)) return '$0';
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0
+            }).format(value);
+        }
+
+       function formatDate(dateString) {
+  if (!dateString) return 'N/A';
+  try {
+    const parts = dateString.split('-'); // YYYY-MM-DD
+    const year = parseInt(parts[0]);
+    const month = parseInt(parts[1]) - 1; // JS: meses 0-indexed
+    const day = parseInt(parts[2]);
+    const localDate = new Date(year, month, day);
+    return localDate.toLocaleDateString('es-CO', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  } catch {
+    return dateString;
+  }
+}
+
+
+        // Get category name
+        function getCategoryName(categoria) {
+            const nombres = {
+                'CATEGORIA_1': 'Lácteos y Refrigerados',
+                'CATEGORIA_2': 'Granos y Abarrotes',
+                'CATEGORIA_3': 'Bebidas Alcohólicas',
+                'CATEGORIA_4': 'Aseo y Papelería'
+            };
+            return nombres[categoria] || categoria || 'N/A';
+        }
+
+        // Generate unique ID - still needed for internal filtering/export, but not displayed
+        function generateId(index) {
+            return `COT-${String(index + 1).padStart(4, '0')}`;
+        }
+
+        // Update statistics
+        function updateStats(cotizaciones) {
+            const totalCotizaciones = cotizaciones.length;
+            const valorTotal = cotizaciones.reduce((sum, cot) => sum + (cot.valorTotal || 0), 0);
+            const horasTotales = cotizaciones.reduce((sum, cot) => sum + (cot.totalHoras || 0), 0);
+            const promedioCliente = totalCotizaciones > 0 ? valorTotal / totalCotizaciones : 0;
+
+            document.getElementById('totalCotizaciones').textContent = totalCotizaciones.toLocaleString();
+            document.getElementById('valorTotal').textContent = formatCurrency(valorTotal);
+            document.getElementById('promedioCliente').textContent = formatCurrency(promedioCliente);
+            document.getElementById('horasTotales').textContent = horasTotales.toFixed(1);
+        }
+
+        // Render table
+        function renderTable(cotizaciones) {
+            const tbody = document.getElementById('tableBody');
+            const loadingContainer = document.getElementById('loadingContainer');
+            const table = document.getElementById('cotizacionesTable');
+            const emptyState = document.getElementById('emptyState');
+
+            // Hide loading
+            loadingContainer.style.display = 'none';
+
+            if (cotizaciones.length === 0) {
+                table.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            // Show table and hide empty state
+            table.style.display = 'table';
+            emptyState.style.display = 'none';
+
+            // Clear existing rows
+            tbody.innerHTML = '';
+
+            // Add rows
+            cotizaciones.forEach((cotizacion, index) => {
+                const row = tbody.insertRow();
+                
+                // Prepare tooltip data
+                const clienteTooltip = cotizacion.cliente || 'N/A';
+                const email = cotizacion.email || 'N/A';
+                const telefono = cotizacion.telefono || 'N/A';
+                
+                row.innerHTML = `
+                    <td>${formatDate(cotizacion.fecha)}</td>
+                    <td>
+                        <div class="client-name" data-tooltip="${clienteTooltip}">
+                            ${clienteTooltip}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="contact-info">
+                            <div class="copyable" data-clipboard-text="${email}"><i class="fas fa-envelope"></i> ${email}</div>
+                            <div class="copyable" data-clipboard-text="${telefono}"><i class="fas fa-phone"></i> ${telefono}</div>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-size: 0.75rem;">
+                            <div><strong>${cotizacion.ciudades || 0}</strong> ciudades</div>
+                            <div><strong>${cotizacion.pdv || 0}</strong> PDV</div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="status-badge active">
+                            ${getCategoryName(cotizacion.categoria)}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="font-size: 0.75rem;">
+                            <div>SKU: <strong>${cotizacion.skuPromedio || 'N/A'}</strong></div>
+                            <div>Visitas: <strong>${cotizacion.visitasMes || 'N/A'}</strong>/mes</div>
+                        </div>
+                    </td>
+                    <td><strong>${(cotizacion.totalHoras || 0).toFixed(1)}h</strong></td>
+                    <td><span class="currency">${formatCurrency(cotizacion.valorTotal)}</span></td>
+                    <td>
+                        <span class="status-badge completed">
+                            <i class="fas fa-check-circle"></i>
+                            Cotizado
+                        </span>
+                    </td>
+                `;
+            });
+
+            // Add click listener for copyable items
+            tbody.querySelectorAll('.copyable').forEach(element => {
+                element.addEventListener('click', function() {
+                    const textToCopy = this.getAttribute('data-clipboard-text');
+                    if (textToCopy && textToCopy !== 'N/A') {
+                        navigator.clipboard.writeText(textToCopy)
+                            .then(() => showToast(`Copiado: ${textToCopy}`, 'success'))
+                            .catch(err => showToast('Error al copiar', 'error'));
+                    }
+                });
+            });
+        }
+
+        // Search functionality
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                
+                if (searchTerm === '') {
+                    filteredCotizaciones = [...allCotizaciones];
+                } else {
+                    filteredCotizaciones = allCotizaciones.filter(cotizacion => {
+                        return (
+                            (cotizacion.cliente || '').toLowerCase().includes(searchTerm) ||
+                            (cotizacion.email || '').toLowerCase().includes(searchTerm) ||
+                            (cotizacion.telefono || '').toLowerCase().includes(searchTerm) ||
+                            getCategoryName(cotizacion.categoria).toLowerCase().includes(searchTerm) ||
+                            generateId(allCotizaciones.indexOf(cotizacion)).toLowerCase().includes(searchTerm) // Still useful for searching by ID internally if needed
+                        );
+                    });
+                }
+                
+                renderTable(filteredCotizaciones);
+                updateStats(filteredCotizaciones);
+            });
+        }
+
+        // Export data to Excel
+        function exportToExcel() {
+            try {
+                if (filteredCotizaciones.length === 0) {
+                    showToast('No hay datos para exportar', 'error');
+                    return;
+                }
+
+                // Prepare data for export
+                const exportData = filteredCotizaciones.map((cotizacion, index) => ({
+                    'ID': generateId(allCotizaciones.indexOf(cotizacion)), // Keep ID for export
+                    'Fecha': formatDate(cotizacion.fecha),
+                    'Cliente': cotizacion.cliente || 'N/A',
+                    'Email': cotizacion.email || 'N/A',
+                    'Teléfono': cotizacion.telefono || 'N/A',
+                    'Ciudades': cotizacion.ciudades || 0,
+                    'PDV': cotizacion.pdv || 0,
+                    'Categoría': getCategoryName(cotizacion.categoria),
+                    'SKU Promedio': cotizacion.skuPromedio || 'N/A',
+                    'Visitas por Mes': cotizacion.visitasMes || 'N/A',
+                    'Horas Totales': (cotizacion.totalHoras || 0).toFixed(1),
+                    'Valor Total': cotizacion.valorTotal || 0,
+                    'Estado': 'Cotizado'
+                }));
+
+                // Create workbook
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet(exportData);
+                
+                // Format headers
+                const headerStyle = {
+                    font: { bold: true, color: { rgb: "FFFFFF" } },
+                    fill: { fgColor: { rgb: "3B82F6" } }
+                };
+                
+                // Add worksheet to workbook
+                XLSX.utils.book_append_sheet(wb, ws, "Cotizaciones");
+                
+                // Generate file and download
+                const date = new Date().toISOString().split('T')[0];
+                XLSX.writeFile(wb, `Cotizaciones_${date}.xlsx`);
+                
+                showToast('Datos exportados exitosamente', 'success');
+            } catch (error) {
+                console.error('Error exporting to Excel:', error);
+                showToast('Error al exportar los datos', 'error');
+            }
+        }
+
+        // Open Power BI Dashboard
+        function openPowerBiDashboard() {
+            try {
+                // Prepare data for Power BI
+                const powerBiData = {
+                    cotizaciones: filteredCotizaciones,
+                    stats: {
+                        totalCotizaciones: filteredCotizaciones.length,
+                        valorTotal: filteredCotizaciones.reduce((sum, cot) => sum + (cot.valorTotal || 0), 0),
+                        horasTotales: filteredCotizaciones.reduce((sum, cot) => sum + (cot.totalHoras || 0), 0)
+                    },
+                    updatedAt: new Date().toISOString()
+                };
+
+                // Store data in localStorage for Power BI to access
+                localStorage.setItem('powerBiData', JSON.stringify(powerBiData));
+                
+                // Open Power BI HTML file
+                window.open('powerbi-dashboard.html', '_blank');
+                
+                showToast('Preparando dashboard de Power BI...', 'success');
+            } catch (error) {
+                console.error('Error opening Power BI:', error);
+                showToast('Error al abrir Power BI', 'error');
+            }
+        }
+
+        // AI Analysis functions
+        function openAiModal() {
+            document.getElementById('aiModal').classList.add('show');
+        }
+
+        function closeAiModal() {
+            document.getElementById('aiModal').classList.remove('show');
+        }
+
+        function resetAiModal() {
+            document.getElementById('aiPromptForm').style.display = 'flex';
+            document.getElementById('aiLoading').style.display = 'none';
+            document.getElementById('aiResponse').style.display = 'none';
+            document.getElementById('aiModalFooter').style.display = 'none';
+            document.getElementById('aiPromptTextarea').value = '';
+        }
+
+        async function submitAiPrompt() {
+            const prompt = document.getElementById('aiPromptTextarea').value.trim();
+            if (!prompt) {
+                showToast('Por favor escribe tu consulta', 'error');
+                return;
+            }
+
+            // Show loading state
+            document.getElementById('aiPromptForm').style.display = 'none';
+            document.getElementById('aiLoading').style.display = 'flex';
+            document.getElementById('aiResponse').style.display = 'none';
+            document.getElementById('aiModalFooter').style.display = 'none';
+
+            try {
+                // Simulate AI analysis (in a real app, you would call an AI API)
+                // This is a mock implementation using setTimeout
+                setTimeout(() => {
+                    // Generate mock analysis based on the data
+                    const mockAnalysis = generateMockAiAnalysis(prompt);
+                    
+                    // Show results
+                    document.getElementById('aiLoading').style.display = 'none';
+                    document.getElementById('aiResponse').style.display = 'block';
+                    document.getElementById('aiResponse').innerHTML = mockAnalysis;
+                    document.getElementById('aiModalFooter').style.display = 'flex';
+                }, 2000);
+            } catch (error) {
+                console.error('Error in AI analysis:', error);
+                document.getElementById('aiLoading').style.display = 'none';
+                document.getElementById('aiResponse').style.display = 'block';
+                document.getElementById('aiResponse').innerHTML = `Error al procesar la solicitud: ${error.message}`;
+                document.getElementById('aiModalFooter').style.display = 'flex';
+            }
+        }
+
+        function generateMockAiAnalysis(prompt) {
+            // This is a mock function - in a real app you would call an AI API
+            const totalCotizaciones = filteredCotizaciones.length;
+            const valorTotal = filteredCotizaciones.reduce((sum, cot) => sum + (cot.valorTotal || 0), 0);
+            const avgPerClient = totalCotizaciones > 0 ? valorTotal / totalCotizaciones : 0;
+            
+            const categories = {};
+            filteredCotizaciones.forEach(cot => {
+                const cat = getCategoryName(cot.categoria);
+                categories[cat] = (categories[cat] || 0) + 1;
+            });
+            
+            const topCategory = Object.entries(categories).sort((a, b) => b[1] - a[1])[0] || ['N/A', 0];
+            
+            return `
+                <h4>Análisis de: "${prompt}"</h4>
+                <p><strong>Resumen general:</strong></p>
+                <ul>
+                    <li>Total de cotizaciones analizadas: ${totalCotizaciones}</li>
+                    <li>Valor total: ${formatCurrency(valorTotal)}</li>
+                    <li>Promedio por cliente: ${formatCurrency(avgPerClient)}</li>
+                    <li>Categoría más frecuente: ${topCategory[0]} (${topCategory[1]} cotizaciones)</li>
+                </ul>
+                
+                <p><strong>Tendencias identificadas:</strong></p>
+                <ol>
+                    <li>Las cotizaciones en la categoría ${topCategory[0]} representan el ${Math.round((topCategory[1]/totalCotizaciones)*100)}% del total.</li>
+                    <li>El valor promedio por cotización es de ${formatCurrency(valorTotal/totalCotizaciones)}.</li>
+                    ${totalCotizaciones > 10 ? '<li>Se observa una tendencia creciente en el número de cotizaciones los últimos meses.</li>' : ''}
+                </ol>
+                
+                <p><strong>Recomendaciones:</strong></p>
+                <ol>
+                    <li>Enfocar más recursos en la categoría ${topCategory[0]} por ser la más demandada.</li>
+                    <li>Considerar paquetes promocionales para clientes con cotizaciones por debajo del promedio.</li>
+                    <li>Implementar seguimiento automatizado a clientes con más de 3 cotizaciones.</li>
+                </ol>
+                
+                <p><em>Nota: Este es un análisis simulado basado en los datos disponibles. Para un análisis más preciso, considere integrar con una API de IA como ChatGPT.</em></p>
+            `;
+        }
+
+        function copyAiResponse() {
+            const responseText = document.getElementById('aiResponse').innerText;
+            navigator.clipboard.writeText(responseText)
+                .then(() => showToast('Análisis copiado al portapapeles', 'success'))
+                .catch(err => showToast('Error al copiar el análisis', 'error'));
+        }
+
+        // Load data from Firebase
+        function loadData() {
+            if (!db) return;
+
+            const loadingContainer = document.getElementById('loadingContainer');
+            const table = document.getElementById('cotizacionesTable');
+            const emptyState = document.getElementById('emptyState');
+
+            // Show loading
+            loadingContainer.style.display = 'flex';
+            table.style.display = 'none';
+            emptyState.style.display = 'none';
+
+            // Remove previous listener if exists
+            if (dataListener) {
+                dataListener();
+            }
+
+            dataListener = db.ref('cotizaciones').orderByChild('timestamp').on('value', (snapshot) => {
+                allCotizaciones = [];
+                
+                snapshot.forEach((childSnapshot) => {
+                    allCotizaciones.push(childSnapshot.val());
+                });
+                
+                // Reverse to show most recent first
+                allCotizaciones.reverse();
+                filteredCotizaciones = [...allCotizaciones];
+                
+                renderTable(filteredCotizaciones);
+                updateStats(filteredCotizaciones);
+            }, (error) => {
+                console.error('Error loading data:', error);
+                showToast('Error al cargar los datos', 'error');
+                loadingContainer.style.display = 'none';
+                emptyState.style.display = 'block';
+            });
+        }
+
+      function refreshData() {
+            showToast('Actualizando datos...', 'default');
+            const icon = document.getElementById('refreshIcon');
+            icon.classList.add('fa-spin'); // Add spin effect
+
+            // Reload data after a short delay to allow spin effect to show
+            setTimeout(() => {
+                icon.classList.remove('fa-spin');
+                loadData(); // This is supposed to fetch new data
+            }, 100);
+        }
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Firebase and load data
+            if (initializeFirebase()) {
+                loadData();
+                setupSearch();
+            }
+            
+            // Setup event listeners
+            document.getElementById('refreshBtn').addEventListener('click', refreshData);
+            document.getElementById('exportBtn').addEventListener('click', exportToExcel);
+            document.getElementById('openBiBtn').addEventListener('click', openPowerBiDashboard);
+            document.getElementById('openAiBtn').addEventListener('click', openAiModal);
+            document.getElementById('closeAiModal').addEventListener('click', closeAiModal);
+            document.getElementById('submitAiPrompt').addEventListener('click', submitAiPrompt);
+            document.getElementById('newAiAnalysis').addEventListener('click', resetAiModal);
+            document.getElementById('copyAiResponse').addEventListener('click', copyAiResponse);
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (dataListener) {
+                dataListener();
+            }
+        });
+    </script>
+</body>
+</html>
