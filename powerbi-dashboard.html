@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Power BI - CRM Cotizaciones (Empresarial)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1e293b; /* Dark Slate Blue */
+            --secondary-color: #3b82f6; /* Blue */
+            --accent-color: #10b981; /* Emerald Green */
+            --warning-color: #f59e0b; /* Amber */
+            --danger-color: #ef4444; /* Red */
+            --info-color: #06b6d4; /* Cyan */
+            --light-bg: #f8fafc; /* Light Grayish Blue */
+            --card-bg: #ffffff; /* White */
+            --text-primary: #0f172a; /* Dark Blue Gray */
+            --text-secondary: #64748b; /* Grayish Blue */
+            --border-color: #e2e8f0; /* Light Gray */
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text-primary);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .dashboard-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .dashboard-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            line-height: 1.1;
+        }
+
+        .dashboard-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+        }
+
+        .powerbi-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #f2c811;
+            font-weight: 700;
+            font-size: 1.2rem;
+            background-color: var(--card-bg);
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .filters-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .filter-group select,
+        .filter-group input[type="date"] {
+            padding: 0.6rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--light-bg);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            min-width: 180px;
+        }
+
+        .filter-button {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+        }
+
+        .filter-button:hover {
+            background-color: #2563eb; /* Darker blue */
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .stat-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon.primary { background: rgba(59, 130, 246, 0.15); color: var(--secondary-color); }
+        .stat-icon.success { background: rgba(16, 185, 129, 0.15); color: var(--accent-color); }
+        .stat-icon.warning { background: rgba(245, 158, 11, 0.15); color: var(--warning-color); }
+        .stat-icon.danger { background: rgba(239, 68, 68, 0.15); color: var(--danger-color); }
+        .stat-icon.info { background: rgba(6, 182, 212, 0.15); color: var(--info-color); }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            line-height: 1;
+        }
+
+        .stat-description {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .chart-header {
+            margin-bottom: 1rem;
+        }
+
+        .chart-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 320px; /* Adjusted height for more substantial charts */
+            width: 100%;
+        }
+
+        .last-update {
+            padding: 1rem 1.5rem;
+            text-align: right;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .charts-grid {
+                grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 1rem;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .dashboard-title {
+                font-size: 2rem;
+            }
+
+            .powerbi-logo {
+                margin-top: 1rem;
+                align-self: flex-end;
+            }
+
+            .stats-grid, .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                height: 280px;
+            }
+
+            .filters-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group select,
+            .filter-group input[type="date"] {
+                min-width: unset;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">Dashboard de Cotizaciones CRM</h1>
+                <p class="dashboard-subtitle">Análisis profundo y visualización de datos comerciales clave</p>
+            </div>
+            <div class="powerbi-logo">
+                <i class="fab fa-microsoft"></i>
+                <span>Power BI Embedded</span>
+            </div>
+        </div>
+
+        <div class="filters-section">
+            <div class="filter-group">
+                <label for="startDate">Fecha Inicio:</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="filter-group">
+                <label for="endDate">Fecha Fin:</label>
+                <input type="date" id="endDate">
+            </div>
+            <div class="filter-group">
+                <label for="categoryFilter">Categoría:</label>
+                <select id="categoryFilter">
+                    <option value="">Todas</option>
+                    <option value="CATEGORIA_1">Lácteos y Refrigerados</option>
+                    <option value="CATEGORIA_2">Granos y Abarrotes</option>
+                    <option value="CATEGORIA_3">Bebidas Alcohólicas</option>
+                    <option value="CATEGORIA_4">Aseo y Papelería</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="clientFilter">Cliente:</label>
+                <select id="clientFilter">
+                    <option value="">Todos</option>
+                    </select>
+            </div>
+            <button class="filter-button" onclick="applyFilters()">Aplicar Filtros</button>
+            <button class="filter-button" style="background-color: var(--danger-color);" onclick="resetFilters()">Restablecer</button>
+        </div>
+
+        <div class="section-title">Métricas Clave</div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title">Total Cotizaciones</span>
+                    <div class="stat-icon primary">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                </div>
+                <div class="stat-value" id="totalCotizaciones">0</div>
+                <div class="stat-description">Número total de cotizaciones generadas.</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title">Valor Total Cotizado</span>
+                    <div class="stat-icon success">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                </div>
+                <div class="stat-value" id="valorTotal">$0</div>
+                <div class="stat-description">Monto total de todas las cotizaciones.</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title">Valor Promedio / Cliente</span>
+                    <div class="stat-icon warning">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                </div>
+                <div class="stat-value" id="promedioCliente">$0</div>
+                <div class="stat-description">Valor promedio por cliente en cotizaciones.</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title">Total Horas Estimadas</span>
+                    <div class="stat-icon danger">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                <div class="stat-value" id="horasTotales">0</div>
+                <div class="stat-description">Suma de horas estimadas en cotizaciones.</div>
+            </div>
+        </div>
+
+        <div class="section-title">Análisis de Cotizaciones</div>
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title"><i class="fas fa-layer-group"></i> Cotizaciones por Categoría</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title"><i class="fas fa-chart-line"></i> Evolución Mensual de Cotizaciones</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title"><i class="fas fa-dollar-sign"></i> Distribución de Valor por Rango</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="valueDistributionChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title"><i class="fas fa-medal"></i> Top 5 Clientes por Valor Cotizado</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="topClientsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title"><i class="fas fa-hourglass-half"></i> Promedio de Horas por Categoría</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="hoursByCategoryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title"><i class="fas fa-user-tie"></i> Cotizaciones por Vendedor (Mock)</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="salespersonChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allCotizacionesData = []; // Store the full dataset
+
+        // Mock data for salespeople (for demonstration)
+        const mockSalespeople = ['Ana García', 'Luis Pérez', 'Marta Gómez', 'Carlos Ruiz', 'Elena Soto'];
+
+        // Simulate fetching data from a database API
+        async function fetchDataFromAPI() {
+            // In a real application, this would be an actual API call:
+            // const response = await fetch('/api/cotizaciones');
+            // const data = await response.json();
+            // return data;
+
+            // For now, load from localStorage as before, but wrapped in a Promise
+            return new Promise(resolve => {
+                setTimeout(() => { // Simulate network delay
+                    const powerBiData = JSON.parse(localStorage.getItem('powerBiData'));
+                    if (!powerBiData) {
+                        console.warn('No se encontraron datos en localStorage. Generando datos de ejemplo.');
+                        resolve(generateMockData()); // Generate mock data if none exists
+                    } else {
+                        // Add mock salesperson to existing data for richer demo
+                        powerBiData.cotizaciones = powerBiData.cotizaciones.map(cot => ({
+                            ...cot,
+                            vendedor: mockSalespeople[Math.floor(Math.random() * mockSalespeople.length)]
+                        }));
+                        resolve(powerBiData);
+                    }
+                }, 500); // 0.5 second delay
+            });
+        }
+
+        // Generate more robust mock data for initial load if localStorage is empty
+        function generateMockData() {
+            const mockData = {
+                stats: {
+                    totalCotizaciones: 0,
+                    valorTotal: 0,
+                    horasTotales: 0,
+                },
+                cotizaciones: [],
+                updatedAt: new Date().toISOString()
+            };
+
+            const numQuotes = 100 + Math.floor(Math.random() * 50); // 100-150 quotes
+            const categories = ['CATEGORIA_1', 'CATEGORIA_2', 'CATEGORIA_3', 'CATEGORIA_4'];
+            const clients = ['Cliente A', 'Cliente B', 'Cliente C', 'Cliente D', 'Cliente E', 'Cliente F', 'Cliente G'];
+
+            for (let i = 1; i <= numQuotes; i++) {
+                const date = new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1);
+                const valor = Math.round(Math.random() * 15000000 + 500000); // 500k to 15.5M
+                const horas = Math.round(Math.random() * 100 + 10); // 10 to 110 hours
+
+                mockData.cotizaciones.push({
+                    id: `Q${String(i).padStart(4, '0')}`,
+                    fecha: date.toISOString(),
+                    cliente: clients[Math.floor(Math.random() * clients.length)],
+                    categoria: categories[Math.floor(Math.random() * categories.length)],
+                    valorTotal: valor,
+                    totalHoras: horas,
+                    vendedor: mockSalespeople[Math.floor(Math.random() * mockSalespeople.length)]
+                });
+
+                mockData.stats.totalCotizaciones++;
+                mockData.stats.valorTotal += valor;
+                mockData.stats.horasTotales += horas;
+            }
+            return mockData;
+        }
+
+        // Format currency
+        function formatCurrency(value) {
+            if (!value || isNaN(value)) return '$0';
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0
+            }).format(value);
+        }
+
+        // Get category name
+        function getCategoryName(categoria) {
+            const nombres = {
+                'CATEGORIA_1': 'Lácteos y Refrigerados',
+                'CATEGORIA_2': 'Granos y Abarrotes',
+                'CATEGORIA_3': 'Bebidas Alcohólicas',
+                'CATEGORIA_4': 'Aseo y Papelería'
+            };
+            return nombres[categoria] || categoria || 'N/A';
+        }
+
+        // Global Chart instances to allow for updates/destruction
+        let categoryChartInstance, monthlyChartInstance, valueDistributionChartInstance,
+            topClientsChartInstance, hoursByCategoryChartInstance, salespersonChartInstance;
+
+        function destroyCharts() {
+            if (categoryChartInstance) categoryChartInstance.destroy();
+            if (monthlyChartInstance) monthlyChartInstance.destroy();
+            if (valueDistributionChartInstance) valueDistributionChartInstance.destroy();
+            if (topClientsChartInstance) topClientsChartInstance.destroy();
+            if (hoursByCategoryChartInstance) hoursByCategoryChartInstance.destroy();
+            if (salespersonChartInstance) salespersonChartInstance.destroy();
+        }
+
+        // Initialize dashboard
+        async function initDashboard() {
+            const data = await fetchDataFromAPI();
+            if (!data) return;
+
+            allCotizacionesData = data.cotizaciones; // Store full dataset
+            populateClientFilter(allCotizacionesData); // Populate client filter on initial load
+            updateDashboard(allCotizacionesData, data.updatedAt);
+        }
+
+        function updateDashboard(cotizaciones, updatedAt) {
+            destroyCharts(); // Destroy existing charts before drawing new ones
+
+            // Calculate stats
+            const totalCotizaciones = cotizaciones.length;
+            const valorTotal = cotizaciones.reduce((sum, cot) => sum + (cot.valorTotal || 0), 0);
+            const horasTotales = cotizaciones.reduce((sum, cot) => sum + (cot.totalHoras || 0), 0);
+            const uniqueClients = new Set(cotizaciones.map(cot => cot.cliente)).size;
+            const promedioCliente = totalCotizaciones > 0 ? valorTotal / uniqueClients : 0; // Avg value per unique client
+
+            // Update stats
+            document.getElementById('totalCotizaciones').textContent = totalCotizaciones.toLocaleString();
+            document.getElementById('valorTotal').textContent = formatCurrency(valorTotal);
+            document.getElementById('promedioCliente').textContent = formatCurrency(promedioCliente);
+            document.getElementById('horasTotales').textContent = horasTotales.toFixed(1) + 'h';
+            
+            // Update last update time (if still desired, though table is removed)
+            // document.getElementById('lastUpdate').textContent = `Última actualización: ${new Date(updatedAt).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' })}`;
+
+            // Prepare data for charts
+            prepareChartsData(cotizaciones);
+        }
+
+        // Prepare data for charts
+        function prepareChartsData(cotizaciones) {
+            // Group by category
+            const categories = {};
+            const hoursPerCategory = {};
+            cotizaciones.forEach(cot => {
+                const cat = getCategoryName(cot.categoria);
+                categories[cat] = (categories[cat] || 0) + 1;
+                hoursPerCategory[cat] = (hoursPerCategory[cat] || 0) + (cot.totalHoras || 0);
+            });
+
+            // Group by month
+            const months = {};
+            cotizaciones.forEach(cot => {
+                const date = new Date(cot.fecha);
+                const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                months[monthYear] = (months[monthYear] || 0) + 1;
+            });
+
+            // Value distribution
+            const valueRanges = {
+                '<$1M': 0,
+                '$1M-$5M': 0,
+                '$5M-$10M': 0,
+                '$10M+': 0
+            };
+            cotizaciones.forEach(cot => {
+                const value = cot.valorTotal || 0;
+                if (value < 1000000) valueRanges['<$1M']++;
+                else if (value < 5000000) valueRanges['$1M-$5M']++;
+                else if (value < 10000000) valueRanges['$5M-$10M']++;
+                else valueRanges['$10M+']++;
+            });
+
+            // Top clients
+            const clients = {};
+            cotizaciones.forEach(cot => {
+                if (cot.cliente) {
+                    clients[cot.cliente] = (clients[cot.cliente] || 0) + (cot.valorTotal || 0);
+                }
+            });
+            const topClients = Object.entries(clients)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+
+            // Salesperson performance (mock data)
+            const salespersonPerformance = {};
+            cotizaciones.forEach(cot => {
+                if (cot.vendedor) {
+                    salespersonPerformance[cot.vendedor] = (salespersonPerformance[cot.vendedor] || 0) + (cot.valorTotal || 0);
+                }
+            });
+            const topSalespeople = Object.entries(salespersonPerformance)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5); // Get top 5 salespeople
+
+            // Create charts
+            createCategoryChart(categories);
+            createMonthlyChart(months);
+            createValueDistributionChart(valueRanges);
+            createTopClientsChart(topClients);
+            createHoursByCategoryChart(hoursPerCategory);
+            createSalespersonChart(topSalespeople);
+        }
+
+        // --- Chart Creation Functions ---
+
+        function createCategoryChart(categories) {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            categoryChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(categories),
+                    datasets: [{
+                        data: Object.values(categories),
+                        backgroundColor: [
+                            '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06b6d4', '#6B7280'
+                        ],
+                        hoverOffset: 8,
+                        borderWidth: 2,
+                        borderColor: varColors['--card-bg']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                font: {
+                                    size: 12
+                                },
+                                color: varColors['--text-primary']
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const value = context.raw;
+                                    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                    return `${context.label}: ${value} (${percentage}%)`;
+                                }
+                            },
+                            backgroundColor: varColors['--primary-color'],
+                            titleColor: varColors['--light-bg'],
+                            bodyColor: varColors['--light-bg'],
+                            borderColor: varColors['--border-color'],
+                            borderWidth: 1
+                        }
+                    }
+                }
+            });
+        }
+
+        function createMonthlyChart(months) {
+            const sortedMonths = Object.keys(months).sort();
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            monthlyChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sortedMonths.map(m => {
+                        const [year, month] = m.split('-');
+                        const date = new Date(year, month - 1, 1);
+                        return date.toLocaleString('es-CO', { month: 'short', year: '2-digit' });
+                    }),
+                    datasets: [{
+                        label: 'Cotizaciones',
+                        data: sortedMonths.map(m => months[m]),
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: '#3B82F6',
+                        borderWidth: 3,
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: '#3B82F6',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#3B82F6'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: varColors['--primary-color'],
+                            titleColor: varColors['--light-bg'],
+                            bodyColor: varColors['--light-bg'],
+                            borderColor: varColors['--border-color'],
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0,
+                                color: varColors['--text-secondary']
+                            },
+                            grid: {
+                                color: varColors['--border-color']
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: varColors['--text-secondary']
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createValueDistributionChart(valueRanges) {
+            const ctx = document.getElementById('valueDistributionChart').getContext('2d');
+            valueDistributionChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(valueRanges),
+                    datasets: [{
+                        label: 'Número de Cotizaciones',
+                        data: Object.values(valueRanges),
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)', /* primary */
+                            'rgba(16, 185, 129, 0.8)', /* accent */
+                            'rgba(245, 158, 11, 0.8)', /* warning */
+                            'rgba(239, 68, 68, 0.8)'  /* danger */
+                        ],
+                        borderColor: [
+                            '#3B82F6', '#10B981', '#F59E0B', '#EF4444'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: varColors['--primary-color'],
+                            titleColor: varColors['--light-bg'],
+                            bodyColor: varColors['--light-bg'],
+                            borderColor: varColors['--border-color'],
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0,
+                                color: varColors['--text-secondary']
+                            },
+                            grid: {
+                                color: varColors['--border-color']
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: varColors['--text-secondary']
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createTopClientsChart(topClients) {
+            const ctx = document.getElementById('topClientsChart').getContext('2d');
+            topClientsChartInstance = new Chart(ctx, {
+                type: 'bar', // Changed to vertical bar for better readability with many clients
+                data: {
+                    labels: topClients.map(c => c[0]),
+                    datasets: [{
+                        label: 'Valor Total Cotizado',
+                        data: topClients.map(c => c[1]),
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: '#3B82F6',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', // Make it horizontal
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: varColors['--primary-color'],
+                            titleColor: varColors['--light-bg'],
+                            bodyColor: varColors['--light-bg'],
+                            borderColor: varColors['--border-color'],
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: ${formatCurrency(context.raw)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                },
+                                color: varColors['--text-secondary']
+                            },
+                            grid: {
+                                color: varColors['--border-color']
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: varColors['--text-secondary']
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createHoursByCategoryChart(hoursPerCategory) {
+            const ctx = document.getElementById('hoursByCategoryChart').getContext('2d');
+            hoursByCategoryChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(hoursPerCategory),
+                    datasets: [{
+                        label: 'Horas Estimadas',
+                        data: Object.values(hoursPerCategory),
+                        backgroundColor: 'rgba(16, 185, 129, 0.7)', /* accent color */
+                        borderColor: '#10B981',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: varColors['--primary-color'],
+                            titleColor: varColors['--light-bg'],
+                            bodyColor: varColors['--light-bg'],
+                            borderColor: varColors['--border-color'],
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw.toFixed(1)}h`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0,
+                                callback: function(value) { return value + 'h'; },
+                                color: varColors['--text-secondary']
+                            },
+                            grid: {
+                                color: varColors['--border-color']
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: varColors['--text-secondary']
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createSalespersonChart(salespersonData) {
+            const ctx = document.getElementById('salespersonChart').getContext('2d');
+            salespersonChartInstance = new Chart(ctx, {
+                type: 'polarArea',
+                data: {
+                    labels: salespersonData.map(s => s[0]),
+                    datasets: [{
+                        label: 'Valor de Cotizaciones',
+                        data: salespersonData.map(s => s[1]),
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)',  // primary
+                            'rgba(16, 185, 129, 0.7)',  // accent
+                            'rgba(245, 158, 11, 0.7)',  // warning
+                            'rgba(239, 68, 68, 0.7)',   // danger
+                            'rgba(6, 182, 212, 0.7)'    // info
+                        ],
+                        borderColor: varColors['--card-bg'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                font: {
+                                    size: 12
+                                },
+                                color: varColors['--text-primary']
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: varColors['--primary-color'],
+                            titleColor: varColors['--light-bg'],
+                            bodyColor: varColors['--light-bg'],
+                            borderColor: varColors['--border-color'],
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${formatCurrency(context.raw)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            grid: {
+                                color: varColors['--border-color']
+                            },
+                            ticks: {
+                                backdropColor: varColors['--card-bg'],
+                                color: varColors['--text-secondary'],
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Filter Logic ---
+        function populateClientFilter(cotizaciones) {
+            const clientFilter = document.getElementById('clientFilter');
+            const uniqueClients = [...new Set(cotizaciones.map(cot => cot.cliente))].sort();
+            clientFilter.innerHTML = '<option value="">Todos</option>';
+            uniqueClients.forEach(client => {
+                const option = document.createElement('option');
+                option.value = client;
+                option.textContent = client;
+                clientFilter.appendChild(option);
+            });
+        }
+
+        function applyFilters() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const category = document.getElementById('categoryFilter').value;
+            const client = document.getElementById('clientFilter').value;
+
+            let filteredData = [...allCotizacionesData]; // Start with a copy of the full dataset
+
+            if (startDate) {
+                const start = new Date(startDate);
+                filteredData = filteredData.filter(cot => new Date(cot.fecha) >= start);
+            }
+            if (endDate) {
+                const end = new Date(endDate);
+                filteredData = filteredData.filter(cot => new Date(cot.fecha) <= end);
+            }
+            if (category) {
+                filteredData = filteredData.filter(cot => cot.categoria === category);
+            }
+            if (client) {
+                filteredData = filteredData.filter(cot => cot.cliente === client);
+            }
+
+            updateDashboard(filteredData, new Date().toISOString()); // Pass current time as update time for filtered data
+        }
+
+        function resetFilters() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('categoryFilter').value = '';
+            document.getElementById('clientFilter').value = '';
+            updateDashboard(allCotizacionesData, new Date().toISOString()); // Reset to full data
+        }
+
+        // Get CSS variables for Chart.js styling
+        const varColors = {
+            '--primary-color': getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim(),
+            '--secondary-color': getComputedStyle(document.documentElement).getPropertyValue('--secondary-color').trim(),
+            '--accent-color': getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim(),
+            '--warning-color': getComputedStyle(document.documentElement).getPropertyValue('--warning-color').trim(),
+            '--danger-color': getComputedStyle(document.documentElement).getPropertyValue('--danger-color').trim(),
+            '--info-color': getComputedStyle(document.documentElement).getPropertyValue('--info-color').trim(),
+            '--light-bg': getComputedStyle(document.documentElement).getPropertyValue('--light-bg').trim(),
+            '--card-bg': getComputedStyle(document.documentElement).getPropertyValue('--card-bg').trim(),
+            '--text-primary': getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+            '--text-secondary': getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim(),
+            '--border-color': getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim(),
+        };
+
+        // Initialize dashboard when loaded
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+</html>
